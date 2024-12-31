@@ -1,35 +1,48 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// src/App.js
+import LocationModal from "./components/locationModal";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { setUserLocation } from "./store/locationSlice";
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+  const [showModal, setShowModal] = useState(true);
+  const dispatch = useDispatch();
+
+  const handleEnableLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          dispatch(setUserLocation({ latitude, longitude }));
+          setShowModal(false);
+        },
+        (error) => {
+          console.error("Error getting location", error);
+          // Handle error (e.g., show a message)
+        }
+      );
+    } else {
+      console.error("Geolocation not supported");
+      // Handle lack of support
+    }
+  };
+
+  const handleSearchManually = () => {
+    // Logic to switch to manual search
+    setShowModal(false);
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div>
+      {showModal && (
+        <LocationModal
+          onEnableLocation={handleEnableLocation}
+          onSearchManually={handleSearchManually}
+        />
+      )}
+      {/* Rest of your app */}
+    </div>
+  );
+};
 
-export default App
+export default App;
